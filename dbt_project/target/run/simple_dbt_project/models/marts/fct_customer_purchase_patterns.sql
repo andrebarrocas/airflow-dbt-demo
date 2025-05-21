@@ -1,9 +1,14 @@
-{{
-    config(
-        materialized='table',
-        tags=['daily']
-    )
-}}
+
+  
+    
+
+  create  table "airflow"."public"."fct_customer_purchase_patterns__dbt_tmp"
+  
+  
+    as
+  
+  (
+    
 
 WITH customer_orders AS (
     SELECT
@@ -14,7 +19,7 @@ WITH customer_orders AS (
             PARTITION BY customer_id 
             ORDER BY order_date
         ) as previous_order_date
-    FROM {{ ref('stg_orders') }}
+    FROM "airflow"."public"."stg_orders"
 ),
 
 customer_metrics AS (
@@ -54,4 +59,6 @@ SELECT
         WHEN avg_order_amount >= 100 THEN 'Standard'
         ELSE 'Basic'
     END as value_segment
-FROM customer_metrics 
+FROM customer_metrics
+  );
+  

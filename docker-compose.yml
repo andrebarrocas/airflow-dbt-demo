@@ -24,8 +24,9 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
       - ./dbt_project:/opt/airflow/dbt_project
+      - ./setup:/opt/airflow/setup
     entrypoint: /bin/bash
-    command: -c "airflow db init && airflow users create --username airflow --password airflow --firstname Anonymous --lastname Admin --role Admin --email admin@example.com"
+    command: -c "airflow db init && airflow users create --username airflow --password airflow --firstname Anonymous --lastname Admin --role Admin --email admin@example.com && python /opt/airflow/setup/init_connections.py"
 
   airflow-webserver:
     image: custom-airflow-dbt

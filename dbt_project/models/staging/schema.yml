@@ -22,6 +22,7 @@ models:
 
 sources:
   - name: raw
+    schema: raw
     description: Raw data from our operational systems
     tables:
       - name: orders
