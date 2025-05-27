@@ -14,7 +14,7 @@ A minimal example showing how to run dbt models using Apache Airflow.
 1. Create and activate a Python virtual environment:
 ```bash
 # Create virtual environment
-python -m venv venv
+python3.9 -m venv venv
 
 # Activate virtual environment
 # On macOS/Linux:

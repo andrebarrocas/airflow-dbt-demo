@@ -1,4 +1,16 @@
-version: '3'
+x-airflow-common: &airflow-common
+  image: custom-airflow-dbt
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__WEBSERVER__SECRET_KEY: 'this-is-a-test-key-do-not-use-in-production'
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./dbt_project:/opt/airflow/dbt_project
+    - ./setup:/opt/airflow/setup
+
 services:
   postgres:
     image: postgres:13
@@ -8,38 +20,28 @@ services:
       - POSTGRES_DB=airflow
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
 
   airflow-init:
-    image: custom-airflow-dbt
+    <<: *airflow-common
     depends_on:
-      - postgres
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-      - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - _AIRFLOW_DB_UPGRADE=true
-      - _AIRFLOW_WWW_USER_CREATE=true
-      - _AIRFLOW_WWW_USER_USERNAME=airflow
-      - _AIRFLOW_WWW_USER_PASSWORD=airflow
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./dbt_project:/opt/airflow/dbt_project
-      - ./setup:/opt/airflow/setup
-    entrypoint: /bin/bash
-    command: -c "airflow db init && airflow users create --username airflow --password airflow --firstname Anonymous --lastname Admin --role Admin --email admin@example.com && python /opt/airflow/setup/init_connections.py"
+      postgres:
+        condition: service_healthy
+    command: >
+      bash -c '
+      airflow db init &&
+      airflow users create --username airflow --password airflow --firstname Anonymous --lastname Admin --role Admin --email admin@example.com &&
+      python /opt/airflow/setup/init_connections.py
+      '
 
   airflow-webserver:
-    image: custom-airflow-dbt
+    <<: *airflow-common
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-      - AIRFLOW__CORE__LOAD_EXAMPLES=False
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./dbt_project:/opt/airflow/dbt_project
     ports:
       - "8080:8080"
     command: webserver
@@ -50,15 +52,8 @@ services:
       retries: 3
 
   airflow-scheduler:
-    image: custom-airflow-dbt
+    <<: *airflow-common
     depends_on:
       airflow-init:
         condition: service_completed_successfully
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-      - AIRFLOW__CORE__LOAD_EXAMPLES=False
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - ./dbt_project:/opt/airflow/dbt_project
     command: scheduler 
