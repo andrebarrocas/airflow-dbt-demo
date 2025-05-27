@@ -2,6 +2,45 @@
 
 A minimal example showing how to run dbt models using Apache Airflow.
 
+## Prerequisites
+
+- Docker
+- Docker Compose
+- Python 3.8 or later
+- pip (Python package installer)
+
+## Setup
+
+1. Create and activate a Python virtual environment:
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+.\venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+2. Build the custom Airflow image:
+```bash
+docker build -t custom-airflow-dbt .
+```
+
+3. Start the services:
+```bash
+docker compose up -d
+```
+
+4. Access Airflow web interface:
+- URL: http://localhost:8080
+- Username: airflow
+- Password: airflow
+
 ## Project Structure
 
 ```
@@ -14,32 +53,13 @@ A minimal example showing how to run dbt models using Apache Airflow.
 │   │       └── orders.sql # Simple orders model
 │   ├── profiles.yml       # dbt connection profiles
 │   └── dbt_project.yml    # dbt project configuration
+├── setup/                 # Setup scripts
+│   └── init_connections.py # Airflow connection initialization
 ├── docker-compose.yml     # Docker services configuration
 ├── Dockerfile             # Custom Airflow image with dbt
+├── requirements.txt       # Python dependencies
 └── README.md             # This file
 ```
-
-## Prerequisites
-
-- Docker
-- Docker Compose
-
-## Quick Start
-
-1. Build the custom Airflow image:
-```bash
-docker build -t custom-airflow-dbt .
-```
-
-2. Start the services:
-```bash
-docker-compose up -d
-```
-
-3. Access Airflow web interface:
-- URL: http://localhost:8080
-- Username: airflow
-- Password: airflow
 
 ## Testing the Pipeline
 
@@ -74,4 +94,12 @@ If you encounter any issues:
 3. Check container logs:
    ```bash
    docker-compose logs -f
-   ``` 
+   ```
+4. Common issues:
+   - If you see permission errors, make sure you're running commands with appropriate privileges
+   - If containers fail to start, try stopping and removing all containers:
+     ```bash
+     docker-compose down -v
+     docker-compose up -d
+     ```
+   - If dbt fails to connect, check the profiles.yml configuration and make sure PostgreSQL is running 

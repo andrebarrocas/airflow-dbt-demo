@@ -1,25 +1,22 @@
-from airflow import settings
 from airflow.models import Connection
+from airflow import settings
+from airflow.models.crypto import get_fernet
 from airflow.utils.session import create_session
 
-def init_connections():
-    with create_session() as session:
-        # Add PostgreSQL connection
-        postgres_conn = Connection(
-            conn_id='postgres_default',
-            conn_type='postgres',
-            host='postgres',
-            schema='public',
-            login='airflow',
-            password='airflow',
-            port=5432,
-            extra={"database": "airflow"}  # Add database name explicitly
-        )
-        
-        # Check if connection already exists
-        if not session.query(Connection).filter(Connection.conn_id == postgres_conn.conn_id).first():
-            session.add(postgres_conn)
-            session.commit()
+def create_conn():
+    conn = Connection(
+        conn_id="postgres_default",
+        conn_type="postgres",
+        host="postgres",
+        login="airflow",
+        password="airflow",
+        schema="airflow",
+        port=5432
+    )
+    session = settings.Session()
+    session.add(conn)
+    session.commit()
+    session.close()
 
-if __name__ == '__main__':
-    init_connections() 
+if __name__ == "__main__":
+    create_conn() 
