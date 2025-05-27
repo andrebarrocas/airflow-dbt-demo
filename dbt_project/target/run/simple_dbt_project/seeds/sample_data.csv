@@ -1,0 +1,14 @@
+
+    
+    
+    
+    create table "airflow"."public"."sample_data" ("id" integer,"name" text,"country" text)
+  ;
+    -- dbt seed --
+    
+          insert into "airflow"."public"."sample_data" ("id", "name", "country") values
+          (%s,%s,%s),(%s,%s,%s),(%s,%s,%s)
+      
+
+;
+  

@@ -1,5 +1,5 @@
 
-  create view "airflow"."public"."stg_orders__dbt_tmp"
+  create view "airflow"."public_staging"."stg_orders__dbt_tmp"
     
     
   as (

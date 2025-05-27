@@ -1,14 +1,17 @@
 # Simple dbt Airflow Project
 
-This project demonstrates how to run dbt models using Apache Airflow for orchestration.
+A minimal example showing how to run dbt models using Apache Airflow.
 
 ## Project Structure
 
 ```
 .
 ├── dags/                   # Airflow DAGs
+│   └── dbt_dag.py         # Simple dbt pipeline
 ├── dbt_project/           # dbt project files
 │   ├── models/            # dbt models
+│   │   └── example/       # Example models
+│   │       └── orders.sql # Simple orders model
 │   ├── profiles.yml       # dbt connection profiles
 │   └── dbt_project.yml    # dbt project configuration
 ├── docker-compose.yml     # Docker services configuration
@@ -16,37 +19,59 @@ This project demonstrates how to run dbt models using Apache Airflow for orchest
 └── README.md             # This file
 ```
 
-## Getting Started
+## Prerequisites
+
+- Docker
+- Docker Compose
+
+## Quick Start
 
 1. Build the custom Airflow image:
+```bash
+docker build -t custom-airflow-dbt .
+```
+
+2. Start the services:
+```bash
+docker-compose up -d
+```
+
+3. Access Airflow web interface:
+- URL: http://localhost:8080
+- Username: airflow
+- Password: airflow
+
+## Testing the Pipeline
+
+1. The DAG will automatically run daily, but you can test it manually:
+   - Go to the Airflow UI
+   - Find the 'simple_dbt_pipeline' DAG
+   - Click the "Play" button to trigger it manually
+
+2. The pipeline has two tasks:
+   - dbt_run: Creates the orders table
+   - dbt_test: Runs dbt tests
+
+3. To verify the results:
+   - Connect to the PostgreSQL database:
+     ```bash
+     docker exec -it simple-dbt-airflow-project-postgres-1 psql -U airflow -d airflow
+     ```
+   - Query the orders table:
+     ```sql
+     SELECT * FROM public.orders;
+     ```
+
+## Troubleshooting
+
+If you encounter any issues:
+
+1. Check the Airflow task logs in the UI
+2. Verify the containers are running:
    ```bash
-   docker build -t custom-airflow-dbt .
+   docker-compose ps
    ```
-
-2. Update the docker-compose.yml to use your custom image:
-   - Change the image from `apache/airflow:2.7.1` to `custom-airflow-dbt` for both airflow services
-
-3. Start the services:
+3. Check container logs:
    ```bash
-   docker-compose up -d
-   ```
-
-4. Access Airflow web interface:
-   - Open http://localhost:8080 in your browser
-   - Default credentials:
-     - Username: airflow
-     - Password: airflow
-
-5. The DAG will run automatically once per day, or you can trigger it manually from the Airflow UI.
-
-## Components
-
-- **Airflow DAG**: Located in `dags/dbt_dag.py`, runs dbt models daily
-- **dbt Models**: Located in `dbt_project/models/`, contains your data transformations
-- **PostgreSQL**: Used as both Airflow metadata database and target database for dbt models
-
-## Notes
-
-- The project uses PostgreSQL as the target database for simplicity
-- The dbt models are very simple examples and should be modified for your use case
-- All services run in Docker containers for easy setup and portability 
+   docker-compose logs -f
+   ``` 

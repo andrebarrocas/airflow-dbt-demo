@@ -19,6 +19,22 @@ models:
           - not_null
           - positive_values:
               zero_allowed: true
+  - name: stg_sample_data
+    description: "Staged user data from sample_data seed"
+    columns:
+      - name: user_id
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+      - name: full_name
+        description: "User's full name"
+        tests:
+          - not_null
+      - name: country_code
+        description: "User's country code"
+        tests:
+          - not_null
 
 sources:
   - name: raw

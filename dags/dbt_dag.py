@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
-    'start_date': datetime(2024, 1, 1),
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
@@ -13,22 +12,23 @@ default_args = {
 }
 
 with DAG(
-    'dbt_run_dag',
+    'simple_dbt_pipeline',
     default_args=default_args,
-    description='A simple DAG to run dbt',
+    description='A simple dbt pipeline',
     schedule_interval=timedelta(days=1),
+    start_date=datetime(2024, 1, 1),
     catchup=False
 ) as dag:
 
     dbt_run = BashOperator(
         task_id='dbt_run',
-        bash_command='cd /opt/airflow/dbt_project && dbt run --profiles-dir .',
+        bash_command='cd /opt/airflow/dbt_project && dbt run',
         dag=dag
     )
 
     dbt_test = BashOperator(
         task_id='dbt_test',
-        bash_command='cd /opt/airflow/dbt_project && dbt test --profiles-dir .',
+        bash_command='cd /opt/airflow/dbt_project && dbt test',
         dag=dag
     )
 

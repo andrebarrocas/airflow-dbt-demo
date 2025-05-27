@@ -5,18 +5,37 @@ config-version: 2
 profile: 'default'
 
 model-paths: ["models"]
-analysis-paths: ["analyses"]
-test-paths: ["tests"]
 seed-paths: ["seeds"]
+test-paths: ["tests"]
+analysis-paths: ["analyses"]
 macro-paths: ["macros"]
-snapshot-paths: ["snapshots"]
 
 target-path: "target"
 clean-targets:
-  - "target"
-  - "dbt_packages"
+    - "target"
+    - "dbt_packages"
+
+seeds:
+  simple_dbt_project:
+    sample_data:
+      +tags: ['reference']
+      +config:
+        column_types:
+          id: integer
+          name: varchar(100)
+          country: varchar(50)
 
 models:
   simple_dbt_project:
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ['staging']
+    
+    marts:
+      +materialized: table
+      +schema: marts
+      +tags: ['mart']
+
     example:
-      +materialized: view 
+      +materialized: table 
