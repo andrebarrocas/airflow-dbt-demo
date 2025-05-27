@@ -15,27 +15,7 @@ clean-targets:
     - "target"
     - "dbt_packages"
 
-seeds:
-  simple_dbt_project:
-    sample_data:
-      +tags: ['reference']
-      +config:
-        column_types:
-          id: integer
-          name: varchar(100)
-          country: varchar(50)
-
 models:
   simple_dbt_project:
-    staging:
-      +materialized: view
-      +schema: staging
-      +tags: ['staging']
-    
-    marts:
-      +materialized: table
-      +schema: marts
-      +tags: ['mart']
-
     example:
       +materialized: table 

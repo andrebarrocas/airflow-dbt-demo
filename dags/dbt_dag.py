@@ -7,7 +7,7 @@ default_args = {
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
+    'retries': 2,
     'retry_delay': timedelta(minutes=5)
 }
 
@@ -20,16 +20,25 @@ with DAG(
     catchup=False
 ) as dag:
 
+    # Debug command to check environment
+    debug_env = BashOperator(
+        task_id='debug_env',
+        bash_command='pwd && ls -la && which dbt && dbt --version',
+        dag=dag
+    )
+
+    # Run dbt with debug output
     dbt_run = BashOperator(
         task_id='dbt_run',
-        bash_command='cd /opt/airflow/dbt_project && dbt run',
+        bash_command='cd /opt/airflow/dbt_project && dbt debug --profiles-dir . && dbt run --profiles-dir . --debug',
         dag=dag
     )
 
+    # Test dbt models
     dbt_test = BashOperator(
         task_id='dbt_test',
-        bash_command='cd /opt/airflow/dbt_project && dbt test',
+        bash_command='cd /opt/airflow/dbt_project && dbt test --profiles-dir . --debug',
         dag=dag
     )
 
-    dbt_run >> dbt_test 
+    debug_env >> dbt_run >> dbt_test 
